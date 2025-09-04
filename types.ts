@@ -26,4 +26,6 @@ export interface LoadingBarProps {
   subtitle?: string;
   /** Optional callback invoked once on mount */
   onLoad?: () => void;
+  /** Optional callback invoked when progress reaches 100% */
+  onSuccess?: () => void;
 }

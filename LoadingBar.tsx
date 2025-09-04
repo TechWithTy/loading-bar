@@ -24,6 +24,7 @@ export default function LoadingBar({
   title,
   subtitle,
   onLoad,
+  onSuccess,
 }: LoadingBarProps) {
   const pct = Math.max(0, Math.min(100, progress));
   const wrapper =
@@ -31,6 +32,7 @@ export default function LoadingBar({
       ? 'inline-flex items-center gap-2 align-middle'
       : 'w-full';
   const lottieRef = React.useRef<any>(null);
+  const hasSuccessTriggered = React.useRef(false);
 
   // Invoke onLoad once on mount
   React.useEffect(() => {
@@ -45,6 +47,13 @@ export default function LoadingBar({
       lottieRef.current.goToAndStop(frame, true);
     }
   }, [pct]);
+
+  React.useEffect(() => {
+    if (pct === 100 && onSuccess && !hasSuccessTriggered.current) {
+      onSuccess();
+      hasSuccessTriggered.current = true;
+    }
+  }, [pct, onSuccess]);
 
   const renderProgress = () => (
     <div className="w-full bg-muted rounded-full h-2.5">
@@ -89,14 +98,21 @@ export default function LoadingBar({
   return (
     <div className={[wrapper, className].filter(Boolean).join(' ')}>
       {mode === 'block' && (title || subtitle) && (
-        <div className="mb-1">
+        <div className="mb-1 text-center">
           {title && <div className="text-sm font-medium leading-none">{title}</div>}
           {subtitle && (
             <div className="text-xs text-muted-foreground leading-snug">{subtitle}</div>
           )}
         </div>
       )}
-      {content}
+      {mode === 'block' ? (
+        <div className="flex items-center gap-2">
+          <div className="flex-1">{content}</div>
+          <span className="text-xs text-foreground/80 tabular-nums">{pct}%</span>
+        </div>
+      ) : (
+        content
+      )}
       {mode === 'inline' && title && (
         <span className="text-xs font-medium">{title}</span>
       )}
